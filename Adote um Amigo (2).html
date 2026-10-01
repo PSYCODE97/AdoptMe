@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Adote um Amigo</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f5efff;--fg:#1e1433;--card:#fff;--bd:#5b3f8f;--ac:#5b21b6;--acfg:#fff;--soft:#e6d9ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#140d26;--fg:#f4edff;--card:#21163a;--bd:#b9a2e8;--ac:#c9a8ff;--acfg:#1a0b33;--soft:#2e2152}}
+:root[data-theme="dark"]{--bg:#140d26;--fg:#f4edff;--card:#21163a;--bd:#b9a2e8;--ac:#c9a8ff;--acfg:#1a0b33;--soft:#2e2152}
+:root[data-contrast="alto"]{--bg:#000;--fg:#fff;--card:#000;--bd:#d9b8ff;--ac:#d9b8ff;--acfg:#000;--soft:#000}
+html{scroll-padding-top:env(safe-area-inset-top,0px);font-size:100%}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;line-height:1.6;font-size:1.125rem}
+.skip{position:absolute;left:-999px;top:0;background:var(--ac);color:var(--acfg);padding:.75rem 1rem;z-index:10}
+.skip:focus{left:0}
+header,main,footer{max-width:68rem;margin:0 auto;padding:1rem}
+h1{font-size:2rem;margin:.25rem 0}
+h2{font-size:1.4rem;margin:0}
+button,a.btn{font:inherit;cursor:pointer;border:2px solid var(--bd);background:var(--card);color:var(--fg);border-radius:.6rem;padding:.6rem 1rem;min-height:2.75rem}
+button[aria-pressed="true"]{background:var(--ac);color:var(--acfg);border-color:var(--ac);font-weight:700}
+.primary{background:var(--ac);color:var(--acfg);border-color:var(--ac);font-weight:700;width:100%}
+:focus-visible{outline:4px solid var(--ac);outline-offset:3px}
+:root[data-contrast="alto"] :focus-visible{outline-color:#fff}
+.tools,.filters{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}
+fieldset{border:0;padding:0;margin:0}
+legend{font-weight:700;margin-bottom:.25rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(16rem,1fr));gap:1rem;list-style:none;padding:0}
+.card{background:var(--card);border:2px solid var(--bd);border-radius:1rem;padding:1rem;display:flex;flex-direction:column;gap:.5rem;height:100%}
+.pic{font-size:4rem;text-align:center;background:var(--soft);border-radius:.75rem;padding:.5rem}
+.tag{font-size:.95rem;font-weight:600}
+.status{min-height:3rem;padding:.75rem;border:2px dashed var(--bd);border-radius:.6rem;margin-top:1rem}
+@media (prefers-reduced-motion:no-preference){button{transition:transform .15s}button:hover{transform:translateY(-2px)}}
+</style>
+</head>
+<body>
+<a class="skip" href="#animais">Pular para a lista de animais</a>
+<header>
+  <h1>🐾 Adote um Amigo</h1>
+  <p>Escolha um animal que procura um lar. Ao clicar em “Quero adotar”, você será levado ao formulário onde registramos a adoção.</p>
+  <div class="tools" role="group" aria-label="Opções de acessibilidade">
+    <button type="button" id="aMais" aria-label="Aumentar tamanho do texto">A+</button>
+    <button type="button" id="aMenos" aria-label="Diminuir tamanho do texto">A−</button>
+    <button type="button" id="contraste" aria-pressed="false">Alto contraste</button>
+  </div>
+</header>
+<main id="conteudo">
+  <fieldset class="filters" id="filtros">
+    <legend>Filtrar por tipo de animal</legend>
+    <button type="button" data-f="todos" aria-pressed="true">Todos</button>
+    <button type="button" data-f="Cachorro" aria-pressed="false">🐶 Cachorros</button>
+    <button type="button" data-f="Gato" aria-pressed="false">🐱 Gatos</button>
+    <button type="button" data-f="Coelho" aria-pressed="false">🐰 Coelhos</button>
+  </fieldset>
+  <h2 id="animais" tabindex="-1">Animais disponíveis</h2>
+  <p id="contagem" role="status"></p>
+  <ul class="grid" id="lista"></ul>
+  <div class="status" id="aviso" role="status" aria-live="polite"></div>
+</main>
+<footer><p>Site feito com foco em acessibilidade: navegação por teclado, leitores de tela, texto ajustável e alto contraste.</p></footer>
+<script>
+
+var FORMS_URL = "https://forms.gle/PLFbNEigvAgY8vmYA";
+
+function configurado(u){return u.indexOf("COLE_AQUI")!==0}
+function destino(nome){
+  if(configurado(FORMS_URL)){
+    if(!FORMS_ENTRY_ID) return FORMS_URL;
+    return FORMS_URL+(FORMS_URL.indexOf("?")>-1?"&":"?")+"usp=pp_url&"+FORMS_ENTRY_ID+"="+encodeURIComponent(nome);
+  }
+  return configurado(DOCS_URL)?DOCS_URL:null;
+}
+
+var pets = [
+ {n:"Thor",t:"Cachorro",e:"🐶",i:"2 anos",p:"Médio",d:"Brincalhão e muito carinhoso. Dá-se bem com crianças."},
+ {n:"Luna",t:"Gato",e:"🐱",i:"1 ano",p:"Pequeno",d:"Calma, gosta de colo e de janelas ensolaradas."},
+ {n:"Bolinha",t:"Cachorro",e:"🐕",i:"5 anos",p:"Pequeno",d:"Sossegado, ideal para apartamento e para quem busca companhia tranquila."},
+ {n:"Mingau",t:"Gato",e:"🐈",i:"3 anos",p:"Médio",d:"Independente, castrado e vacinado."},
+ {n:"Nuvem",t:"Coelho",e:"🐰",i:"1 ano",p:"Pequeno",d:"Dócil e curioso. Adora cenoura e carinho nas orelhas."},
+ {n:"Caramelo",t:"Cachorro",e:"🦮",i:"4 anos",p:"Grande",d:"Leal e energético, precisa de passeios diários."}
+];
+var filtro="todos", lista=document.getElementById("lista"), aviso=document.getElementById("aviso");
+
+function render(){
+  var vis=pets.filter(function(p){return filtro==="todos"||p.t===filtro});
+  document.getElementById("contagem").textContent=vis.length+(vis.length===1?" animal encontrado.":" animais encontrados.");
+  lista.innerHTML="";
+  vis.forEach(function(p){
+    var li=document.createElement("li");
+    li.innerHTML='<article class="card" aria-labelledby="n-'+p.n+'"><div class="pic" aria-hidden="true">'+p.e+'</div>'+
+      '<h3 id="n-'+p.n+'" style="margin:0;font-size:1.3rem">'+p.n+'</h3>'+
+      '<p class="tag">'+p.t+' · '+p.i+' · porte '+p.p.toLowerCase()+'</p><p style="margin:0;flex:1">'+p.d+'</p>'+
+      '<button type="button" class="primary" data-pet="'+p.n+'" aria-label="Quero adotar '+p.n+' (abre o formulário de registro em nova aba)">Quero adotar</button></article>';
+    lista.appendChild(li);
+  });
+}
+lista.addEventListener("click",function(e){
+  var b=e.target.closest("button[data-pet]"); if(!b) return;
+  var nome=b.getAttribute("data-pet");
+  var url=destino(nome);
+  if(!url){
+    aviso.textContent="Quase lá! O link do Google Forms ainda não foi configurado. Edite a variável FORMS_URL no código com o link do seu formulário.";
+    return;
+  }
+  var forms=configurado(FORMS_URL);
+  if(!forms||!FORMS_ENTRY_ID){try{navigator.clipboard.writeText(nome);}catch(err){}}
+  window.open(url,"_blank","noopener");
+  aviso.textContent="Abrindo o "+(forms?"formulário":"documento")+" de registro em uma nova aba. Animal escolhido: "+nome+".";
+});
+document.getElementById("filtros").addEventListener("click",function(e){
+  var b=e.target.closest("button[data-f]"); if(!b) return;
+  filtro=b.getAttribute("data-f");
+  this.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false")});
+  render();
+});
+var tam=100;
+function setTam(v){tam=Math.max(80,Math.min(160,v));document.documentElement.style.fontSize=tam+"%"}
+document.getElementById("aMais").onclick=function(){setTam(tam+10)};
+document.getElementById("aMenos").onclick=function(){setTam(tam-10)};
+document.getElementById("contraste").onclick=function(){
+  var on=this.getAttribute("aria-pressed")!=="true";
+  this.setAttribute("aria-pressed",on);
+  if(on)document.documentElement.setAttribute("data-contrast","alto");else document.documentElement.removeAttribute("data-contrast");
+};
+render();
+</script>
+</body>
+</html>
